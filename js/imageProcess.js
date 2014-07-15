@@ -94,12 +94,15 @@ Array.prototype.minUpperTri = function () {
 
 
 Array.prototype.pairGroup = function (idx1, idx2) {
-	// later make a weighted version of this, will require
-	// pixel colour counts
-	var theCol = new Array(),
-		theRow,
-		r, dump;
-	
+    /*
+    Unweighted pair group clustering method with arithmetic mean.
+    Acting on a pairwise distance matrix (symmetric with zero diagonal).
+    Appends a new row to a matrix (stored as an Array of rows) by
+    taking the arithmetic mean of two rows indexed by idx1 and idx2.
+
+    TODO: make a weighted version of this based on pixel counts
+     */
+
 	// extract rows
 	var row1 = this.splice(idx1,1)[0],
 		row2 = this.splice(idx2-1,1)[0],
@@ -115,12 +118,10 @@ Array.prototype.pairGroup = function (idx1, idx2) {
 	}
 	newrow.push(0); // zero diagonal
 	
-	// extract columns by looping over remaining rows
-	// just re-use means calculated above
+	// append this new row as a column to previous rows
+    var r;
 	for (r = 0; r < this.length; r++) {
-		x1 = this[r].splice(idx1,1)[0];
-		x2 = this[r].splice(idx2-1,1)[0];
-		this[r].push(newrow[r]); // append to end of row
+		this[r].push(newrow[r]);
 	}
 	
 	this.push(newrow); // append new row to bottom
@@ -196,7 +197,7 @@ function makePalette (imageData) {
 		mx2col.push(tree.length-1);
 		
 		// attach deep copy to palette
-		var nextColours = new Array();
+		nextColours = new Array();
 		for (var i = 0; i < ncolours; i++) {
 			nextColours[colours[i]] = colours[tree[i]];
 		}

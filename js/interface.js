@@ -1,15 +1,17 @@
 var	colourKey = document.getElementById('colourkey'),
-	ckContext = colourkey.getContext('2d'),
+	//ckContext = colourkey.getContext('2d'),
 	sliderValue;
 
 colourKey.width=200;
 colourKey.height=400;
 
+/*
 ckContext.font = '12px helvetica, arial, sans-serif';
 ckContext.linewidth=1.0;
 ckContext.fillstyle = 'black';
 ckContext.textAlign = 'left';
 ckContext.textBaseline = 'top';
+*/
 
 context2.font = '128px Palatino';
 context2.linewidth = 1.0;
@@ -86,37 +88,59 @@ function updateColorKey (value) {
 	
 	colourKey.width = colourKey.width; // clear
 	
-	if (mode != 'rgb') {
-		var colours = Object.values(palettes["rgb"][value]);
-		var rgb, map, row = 0;
-		var mapped = [];
-		
-		for (var i = 0; i < colours.length; i++) {
-			// from original colour space
-			rgb = colours[i].split(',').map(function(x){return+x;});
-			
-			// mapped RGB value
-			map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
-			if (mapped.indexOf(map) > -1) {
-				// already in colour key
-				continue;
-			}
-			
-			ckContext.beginPath();
-			ckContext.rect(0, i*10+5, 8, 8);
-			ckContext.fillStyle = 'rgb(' + [map.r, map.g, map.b].toString() + ')';
-			ckContext.fill();
-			
-			ckContext.fillStyle = 'black';
-			ckContext.fillText(map.index, 10, row*10+12);
-			ckContext.strokeText(map.index, 10, row*10+12);
-			ckContext.fillText(map.name, 50, row*10+12);
-			ckContext.strokeText(map.name, 50, row*10+12);
-			
-			mapped.push(map);
-			row++;
-		}
-	}	
+	if (mode === 'rgb') {
+        return;
+    }
+    var colours = Object.values(palettes["rgb"][value]);
+    var rgb, map, row = 0;
+    var mapped = [];
+
+    // clear table
+    $('#colour_key_table tbody tr').remove();
+
+
+    for (var i = 0; i < colours.length; i++) {
+        // from original colour space
+        rgb = colours[i].split(',').map(function(x){return+x;});
+
+        // mapped RGB value
+        map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
+        if (mapped.indexOf(map) > -1) {
+            // already in colour key
+            continue;
+        }
+
+        htmlStr = '<tr>';
+
+        // make color swatch
+        htmlStr += '<td width="20" bgcolor="#';
+        htmlStr += (map.r).toString(16);
+        htmlStr += (map.g).toString(16);
+        htmlStr += (map.b).toString(16);
+        htmlStr += '"></td>';
+
+        htmlStr += '<td>' + map.index + '</td>';
+        htmlStr += '<td>' + map.name + '</td>';
+        htmlStr += '</tr>';
+
+        $('#colour_key_table tbody').append(htmlStr);
+
+        /*
+        ckContext.beginPath();
+        ckContext.rect(0, i*10+5, 8, 8);
+        ckContext.fillStyle = 'rgb(' + [map.r, map.g, map.b].toString() + ')';
+        ckContext.fill();
+
+        ckContext.fillStyle = 'black';
+        ckContext.fillText(map.index, 10, row*10+12);
+        ckContext.strokeText(map.index, 10, row*10+12);
+        ckContext.fillText(map.name, 50, row*10+12);
+        ckContext.strokeText(map.name, 50, row*10+12);
+        */
+
+        mapped.push(map);
+        row++;
+    }
 }
 
 

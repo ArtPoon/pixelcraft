@@ -21,6 +21,8 @@
 				overflow-y: scroll;
 			}
 		</style>
+        <script src="js/jquery-2.1.1.min.js"></script>
+
 		<script src='js/kdTree-min.js'></script>
 		<script src='js/colorMaps.js'></script>
 		<script src='js/imageProcess.js'></script>
@@ -67,10 +69,23 @@
 				</select>
 				</p>
 				
-				<div class="container2">
-				<canvas id='colourkey' style="float: left;">
-				HTML5 Canvas not supported by this browser.
-				</canvas>
+				<div class="container2" style="font-size: 12px">
+                <!-- TODO: re-implement this as dynamically-generated table -->
+                    <table id="colour_key_table">
+                        <thead>
+                            <tr>
+                                <th></th> <!-- swatch -->
+                                <th>#</th>
+                                <th>Colour name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                    <canvas id='colourkey' style="float: left;">
+                        HTML5 Canvas not supported by this browser.
+                    </canvas>
 				</div>
 			
 			</div>

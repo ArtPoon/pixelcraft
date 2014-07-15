@@ -38,11 +38,15 @@ window.onload = function() {
 
 
 function handleFileSelect(evt) {
+    /*
+    Handle file selected by browser dialog.
+     */
 	var files = evt.target.files; // FileList object
-	f = files[0];
+	var f = files[0];
 	
 	// Only process image files.
 	if (!f.type.match('image/png') &&  !f.type.match('image/gif')) {
+        // FIXME: not very elegant - let's use a div tag instead
 		context.font = '64px Helvetica';
 		context.linewidth=1.0;
 		context.fillstyle = 'cornflowerblue';
@@ -66,9 +70,11 @@ function fileReadComplete (e) {
 	
 	(function() {
 		if (img.complete){
+            // FIXME: why do this? to clear canvas?
 			canvas.width = canvas.width;
 			canvas2.width = canvas2.width;
-			
+
+            // need to draw image on canvas to access image data
 			context.drawImage(img, 0, 0);
 			
 			imageData = context.getImageData(0, 0, img.width, img.height);
