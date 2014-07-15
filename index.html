@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="css/style.css" type="text/css" media="screen">
+		<link href='http://fonts.googleapis.com/css?family=Fauna+One' rel='stylesheet' type='text/css'>
+		
+		<title>pixelcraft | Craft patterns from video game sprites</title>
+		<style>
+			#canvas {}
+			.container {border:2px solid #aaa; 
+				width: 800px; 
+				height: 600px; 
+				overflow-x: scroll; 
+				overflow-y: scroll;
+				z-index: 1;
+			}
+			.container2 {border:1px solid #ccc; 
+				width: 190px; 
+				height: 400px; 
+				overflow-y: scroll;
+			}
+		</style>
+		<script src='js/kdTree-min.js'></script>
+		<script src='js/colorMaps.js'></script>
+		<script src='js/imageProcess.js'></script>
+		<script src='js/html5slider.js'></script>
+	</head>
+	
+	<body>	
+		<div style="clear: both; float: left; width: 100%; margin 0 0 30px;">
+			<div style="padding: 5px; font-size: 150%; color: white; background: cornflowerblue">
+			pixelcraft
+			</div>
+			<div style="height: 5px;"></div>
+			<div style="float: left; width: 1005px">
+			<!-- left side -->
+			<div id="controlPanel" style="width: 200px; float: left;">
+				
+			
+				<!-- file load button -->
+				<input type="file" id="inputFile" name="inputFile"/>
+				
+				<!-- slider (range input) -->
+				<p>
+				<div style="font-size: 75%;">Number of colours</div>
+				<input type="range" required id="ncolSlider" name="ncolSlider" 
+					min=2 max=2 value=2 onchange='updateNColoursFromSlider(this.value)'>
+				<div style="font-size: 75%;" id='ncolState'> </div>
+				</p>
+				
+				<!-- drop-down select menu -->
+				<p>
+				<div style="font-size: 75%;">Palette type</div>
+				<select name="dropdown" id="dropdown" onchange='triggerSlider()'>
+					<option value="rgb">RGB</option>
+					<optgroup label="Emb. floss">
+						<option value="dmc">DMC</option>
+						<option value="anchor">Anchor</option>
+					</optgroup>
+					<optgroup label="Beads">
+						<option value="perler">Perler</option>
+						<option value="hama">Hama</option>
+					</optgroup>	
+					<option value="lego">Lego</option>
+					<option value="crayola">Crayola</option>
+				</select>
+				</p>
+				
+				<div class="container2">
+				<canvas id='colourkey' style="float: left;">
+				HTML5 Canvas not supported by this browser.
+				</canvas>
+				</div>
+			
+			</div>
+			
+			<!-- right side -->
+			<div class="container" style="">
+			<canvas id='canvas' style="position: absolute; left: 200; top: 55; z-index: 0;">
+				HTML5 Canvas not supported by this browser.
+			</canvas>
+			<canvas id='canvas2' style="position: absolute; left: 200; top: 55; z-index: 1;">
+				HTML5 Canvas not supported by this browser.
+			</canvas>
+			</div>
+			
+			<div style="height: 5px;"></div>
+			<div style="padding: 5px; font-size: 60%; color: white; background: cornflowerblue">
+			&#169; Art Poon 2013<br>
+			pixelcraft and this website are distributed under the 
+			<a href="http://opensource.org/licenses/MIT">MIT license</a>.<br>  
+			Javascript implementation of KD trees from <a href="https://github.com/ubilabs/kd-tree-javascript">
+			UbiLabs</a>. Anchor RGB values from Tom Klein's <a href="http://cstitch.sourceforge.net/">CStitch</a>.
+			Perler/Hama bead RGB values from Snild Dolkow's <a href="http://dolkow.se/perler/">Perler</a>.<br/>
+			<a href="https://github.com/fryn/html5slider">html5slider</a> (enable HTML5 input range for Firefox) by Frank Yan.
+			</div>
+			</div>
+			
+			
+		</div>
+		
+		<!-- must be placed after canvas elements -->
+		<script src='js/fileReader.js'></script>
+		<script src='js/interface.js'></script>
+		<!------------------------------------------>
+		
+		
+	</body>
+</html>
