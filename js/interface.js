@@ -5,6 +5,9 @@ var	colourKey = document.getElementById('colourkey'),
 colourKey.width=200;
 colourKey.height=400;
 
+var pixel_step = 12,
+    pixel_width = 10;
+
 /*
 ckContext.font = '12px helvetica, arial, sans-serif';
 ckContext.linewidth=1.0;
@@ -36,16 +39,125 @@ Object.values = function (obj) {
 		vals.push(val);
 	}
 	return vals;
+};
+
+
+function invertColour (rgbStr) {
+    /*
+    Convert an RGB string ("r,g,b") to another RGB
+     value that is distant in colour space.
+     */
+    var step = 50;
+    var rgb = rgbStr.split(',').map(function(x) {return+x;});
+    var invRgbStr = '',
+        invRgb;
+    for (var i = 0; i < 3; i++) {
+        invRgb = rgb[i] + ((rgb[i] < 128) ? step : -step);
+        invRgbStr += invRgb.toString();
+        if (i < 2) {
+            invRgbStr += ',';
+        }
+    }
+    return invRgbStr;
+}
+
+function decoratePixel (ctx, x, y, key, invcol) {
+    /*
+    Decorate pixel on HTML5 Canvas with some shape to distinguish
+    between similar colours.
+    Arguments:
+        ctx = HTML5 Canvas context
+        x = left of pixel square
+        y = top of pixel square
+        key = ASCII indicating which shape to draw ('0oDU^dvA+-|/\1234')
+        invcol = tuple of RGB values as comma-delimited string
+     */
+    var half = pixel_width/2.,
+        shim = pixel_width/8.,
+        pi = Math.PI;
+
+    ctx.beginPath();
+    ctx.fillStyle = 'rgb(' + invcol + ')';
+    ctx.strokeStyle = 'rgb(' + invcol + ')';
+    if (key === '0') { // filled circle
+        ctx.arc(x+half, y+half, 0.6*half, 0, 2*pi, true);
+        ctx.fill();
+    } else if (key === 'o') { // open circle
+        ctx.arc(x+half, y+half, 0.6*half, 0, 2*pi, true);
+        ctx.stroke();
+    } else if (key === 'D') { // semicircle right
+        ctx.arc(x+half, y+half, 0.8*half, -.5*pi, .5*pi, false); // clockwise
+        ctx.fill();
+    } else if (key === 'U') { // semicircle down
+        ctx.arc(x+half, y+half, 0.8*half, 0, pi, false); // clockwise
+        ctx.fill();
+    } else if (key === '^') { // semicircle up
+        ctx.arc(x+half, y+half, 0.8*half, 0, pi, true); // anti-clockwise
+        ctx.fill();
+    } else if (key === 'd') { // semicircle left
+        ctx.arc(x+half, y+half, 0.8*half, -.5*pi, .5*pi, true); // anti-clockwise
+        ctx.fill();
+    } else if (key === 'v') { // triangle down
+        ctx.moveTo(x+half, y+half);
+        ctx.lineTo(x+pixel_width-shim, y+shim);
+        ctx.lineTo(x+shim, y+shim);
+        ctx.lineTo(x+half, y+half);
+        ctx.fill();
+    } else if (key === 'A') { // triangle up
+        ctx.moveTo(x+half, y+half);
+        ctx.lineTo(x+pixel_width-shim, y+pixel_width-shim);
+        ctx.lineTo(x+shim, y+pixel_width-shim);
+        ctx.lineTo(x+half, y+half);
+        ctx.fill();
+    } else if (key === '+') {
+        ctx.moveTo(x+shim, y+half);
+        ctx.lineTo(x+pixel_width-shim, y+half);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x+half, y+shim);
+        ctx.lineTo(x+half, y+pixel_width-shim);
+        ctx.stroke();
+    } else if (key === '-') {
+        ctx.moveTo(x+shim, y+half);
+        ctx.lineTo(x+pixel_width-shim, y+half);
+        ctx.stroke();
+    } else if (key === '|') {
+        ctx.moveTo(x+half, y+shim);
+        ctx.lineTo(x+half, y+pixel_width-shim);
+        ctx.stroke();
+    } else if (key == '/') {
+        ctx.moveTo(x+shim, y+pixel_width-shim);
+        ctx.lineTo(x+pixel_width-shim, y+shim);
+        ctx.stroke();
+    } else if (key == '\\') {
+        ctx.moveTo(x+shim, y+shim);
+        ctx.lineTo(x+pixel_width-shim, y+pixel_width-shim);
+        ctx.stroke();
+    } else if (key == 'x') {
+        ctx.moveTo(x+shim, y+pixel_width-shim);
+        ctx.lineTo(x+pixel_width-shim, y+shim);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x+shim, y+shim);
+        ctx.lineTo(x+pixel_width-shim, y+pixel_width-shim);
+        ctx.stroke();
+    } else if (key == '1') { // upper-right quadrant
+        ctx.fillRect(x, y, half, half);
+    } else if (key == '2') {
+        ctx.fillRect(x+half, y, half, half);
+    } else if (key == '3') {
+        ctx.fillRect(x+half, y+half, half, half);
+    } else if (key == '4') {
+        ctx.fillRect(x, y+half, half, half);
+    }
 }
 
 
-
-
-function updateNColoursFromSlider (value) {
-	sliderValue = value;
-	document.getElementById('ncolState').innerHTML = value;
-	updateCanvas(value);
-	updateColorKey(value);
+function updateNColoursFromSlider () {
+	sliderValue = $('#ncolSlider').val();
+	document.getElementById('ncolState').innerHTML = sliderValue;
+	updateCanvas(sliderValue);
+	updateColorKey(sliderValue);
 }
 
 
@@ -55,23 +167,51 @@ function triggerSlider() {
 
 
 function updateCanvas (value) {
-	var rgbStr;
+    /*
+    Redraw pixels on canvas given the number of colours as set
+    by slider (value).
+     */
+	var rgbStr, mapped;
 	var mode = document.getElementById('dropdown').value;
-	
-	for (var i = 0, row = 0; row < imageData.height; row++) {
+	var x, y;
+    var decorate_keys = 'v1A-dU^o+23D0/4\\|';
+
+    // cache colour inversions and decoration keys
+    var i, key;
+    var cache = {};
+    var keys = Object.keys(palettes[mode][value]);
+    for (i = 0; i < keys.length; i++) {
+        key = keys[i];
+        cache[key] = {};
+        cache[key]['inv'] = invertColour(palettes[mode][value][key]);
+        cache[key]['dec'] = decorate_keys[i];
+    }
+
+    // loop through image data pixel-by-pixel
+    var v;
+	for (i = 0, row = 0; row < imageData.height; row++) {
 		for (var col = 0; col < imageData.width; col++) {
 			if (imageData.data[i+3] == 0) {
 				i += 4;
 				continue;
 			}
+            x = pixel_step * col;
+            y = pixel_step * row;
+
 			context.beginPath();
-			context.rect(10*col, 10*row, 8, 8);
+			context.rect(x, y, pixel_width, pixel_width);
 			
 			rgbStr = [imageData.data[i], imageData.data[i+1], imageData.data[i+2]].toString();
-			context.fillStyle = 'rgb(' + palettes[mode][value][rgbStr] + ')';
-			context.fill();
-			// no need to explicitly close path for rectangles
-	
+            mapped = palettes[mode][value][rgbStr];
+			context.fillStyle = 'rgb(' + mapped + ')';
+			context.fill(); // no need to explicitly close path for rectangles
+
+            // decorate pixel?
+            if ($('#decorate_pixel_checkbox').prop('checked')) {
+                v = cache[rgbStr];
+                decoratePixel(context, x, y, v['dec'], v['inv']);
+            }
+
 			i += 4;
 		}
 	}
@@ -113,7 +253,7 @@ function updateColorKey (value) {
         htmlStr = '<tr>';
 
         // make color swatch
-        htmlStr += '<td width="20" bgcolor="#';
+        htmlStr += '<td width="15" bgcolor="#';
         htmlStr += (map.r).toString(16);
         htmlStr += (map.g).toString(16);
         htmlStr += (map.b).toString(16);
@@ -214,16 +354,18 @@ canvas2.onmousemove=function(e) {
 	
 	
 	// what is the nearest square?  canvas partitioned by 10's
-	var sqr = {	x: Math.floor(loc.x / 10), 
-				y: Math.floor(loc.y / 10) };
+	var sqr = {	x: Math.floor(loc.x / pixel_step),
+				y: Math.floor(loc.y / pixel_step) };
 	
 	//console.log(sqr.x, sqr.y); // debugging
 	
 	canvas2.width = canvas2.width;
 	
-	if (imageData && sqr.x < imageData.width && sqr.y < imageData.height) {	
+	if (imageData && sqr.x < imageData.width && sqr.y < imageData.height) {
+        var mode = document.getElementById('dropdown').value;
+
 		context2.beginPath();
-		context2.rect(10*sqr.x-2, 10*sqr.y-2, 12, 12);
+		context2.rect(pixel_step*sqr.x-1, pixel_step*sqr.y-1, pixel_width+2, pixel_width+2);
 	
 		context2.strokeStyle = 'rgb(0,0,0)';
 		context2.stroke();
@@ -231,34 +373,41 @@ canvas2.onmousemove=function(e) {
 	
 		// draw a translucent box with info
 		context2.beginPath();
-		drawRoundedRect('white', 'rgba(0,0,0,0.5)', 10*sqr.x + 20, 10*sqr.y + 20, 200, 85, 15);
+        if (mode === 'rgb') {
+            drawRoundedRect('white', 'rgba(0,0,0,0.5)', pixel_step * (sqr.x + 1), pixel_step * (sqr.y + 1), 80, 85, 15);
+        } else {
+            drawRoundedRect('white', 'rgba(0,0,0,0.5)', pixel_step * (sqr.x + 1), pixel_step * (sqr.y + 1), 200, 85, 15);
+        }
 		context2.closePath();
-		
+
+        // report pixel coordinates in box
 		context2.font = '12px Courier New, Courier, monospace';
 		context2.fillStyle = 'white';
 		context2.fontWeight = 'lighter';
-		context2.fillText('x: '+sqr.x, 10*sqr.x + 32, 10*sqr.y + 40);
-		context2.fillText('y: '+sqr.y, 10*sqr.x + 32, 10*sqr.y + 52);
+		context2.fillText('x: '+sqr.x, pixel_step*(sqr.x+2), pixel_step*(sqr.y+2.5));
+		context2.fillText('y: '+sqr.y, pixel_step*(sqr.x+2), pixel_step*(sqr.y+3.5));
 		//context2.strokeText('foo', 10*sqr.x + 40, 10*sqr.y + 40);
-		
-		var mode = document.getElementById('dropdown').value;
+
+        // retrieve pixel info
 		var idx = 4 * (imageData.width * sqr.y + sqr.x);
 		var rgbStr = [imageData.data[idx], imageData.data[idx+1], imageData.data[idx+2]].toString();
-			
+
+        // report pixel RGB or colour map
+        var col, rgb, map;
 		if (palettes[mode][sliderValue].hasOwnProperty(rgbStr)) {
 			if (mode == 'rgb') {
-				var col = palettes['rgb'][sliderValue][rgbStr];
-				var rgb = col.split(',').map(function(x){return+x;});
-				context2.fillText('r: '+rgb[0], 10*sqr.x + 32, 10*sqr.y + 64);
-				context2.fillText('g: '+rgb[1], 10*sqr.x + 32, 10*sqr.y + 76);
-				context2.fillText('b: '+rgb[2], 10*sqr.x + 32, 10*sqr.y + 88);
+				col = palettes['rgb'][sliderValue][rgbStr];
+				rgb = col.split(',').map(function(x){return+x;});
+				context2.fillText('r: '+rgb[0], pixel_step*(sqr.x+2), pixel_step*(sqr.y + 4.5));
+				context2.fillText('g: '+rgb[1], pixel_step*(sqr.x+2), pixel_step*(sqr.y + 5.5));
+				context2.fillText('b: '+rgb[2], pixel_step*(sqr.x+2), pixel_step*(sqr.y + 6.5));
 			}
 			else {
-				var col = palettes[mode][sliderValue][rgbStr];
-				var rgb = col.split(',').map(function(x){return+x;});
-				var map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
-				context2.fillText(map.index, 10*sqr.x + 32, 10*sqr.y + 64);
-				context2.fillText(map.name, 10*sqr.x + 32, 10*sqr.y + 76);
+				col = palettes[mode][sliderValue][rgbStr];
+				rgb = col.split(',').map(function(x){return+x;});
+				map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
+				context2.fillText(map.index, pixel_step*(sqr.x+2), pixel_step*(sqr.y + 4.5));
+				context2.fillText(map.name, pixel_step*(sqr.x+2), pixel_step*(sqr.y + 5.5));
 			}
 		}
 	}

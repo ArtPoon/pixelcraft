@@ -27,6 +27,19 @@
 		<script src='js/colorMaps.js'></script>
 		<script src='js/imageProcess.js'></script>
 		<script src='js/html5slider.js'></script>
+
+        <script>
+            $(document).ready(function(){
+                $('#decorate_pixel_checkbox').change(function() {
+                    if (imageData === undefined) {
+                        // no image loaded
+                        return;
+                    }
+                    var sliderValue = $('#ncolSlider').val();
+                    updateCanvas(sliderValue);
+                })
+            })
+        </script>
 	</head>
 	
 	<body>	
@@ -47,10 +60,16 @@
 				<p>
 				<div style="font-size: 75%;">Number of colours</div>
 				<input type="range" required id="ncolSlider" name="ncolSlider" 
-					min=2 max=2 value=2 onchange='updateNColoursFromSlider(this.value)'>
+					min=2 max=2 value=2 onchange='updateNColoursFromSlider()'>
 				<div style="font-size: 75%;" id='ncolState'> </div>
 				</p>
-				
+
+                <!-- checkbox for decorating pixels -->
+                <p>
+                <div style="font-size: 75%;">Decorate pixels?</div>
+                <input id="decorate_pixel_checkbox" type="checkbox"/>
+                </p>
+
 				<!-- drop-down select menu -->
 				<p>
 				<div style="font-size: 75%;">Palette type</div>

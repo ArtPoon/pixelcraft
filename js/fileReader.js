@@ -83,7 +83,8 @@ function fileReadComplete (e) {
 			// reset canvases
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			context2.clearRect(0, 0, canvas2.width, canvas2.height);
-			
+
+            /*
 			// pixels are in row-major order
 			for (var i = 0, row = 0; row < imageData.height; row++) {
 				for (var col = 0; col < imageData.width; col++) {
@@ -102,7 +103,7 @@ function fileReadComplete (e) {
 					i += 4;
 				}
 			}
-			
+			*/
 			
 			// generate palettes
 			palettes["rgb"] = makePalette(imageData);
@@ -149,6 +150,9 @@ function fileReadComplete (e) {
 			// reset dropdown to RGB
 			document.getElementById('dropdown').value = 'rgb';
 			colourKey.width = colourKey.width;
+
+            // draw image
+            updateCanvas(numColours);
 		} else {
 			setTimeout(arguments.callee, 50);
 		}
