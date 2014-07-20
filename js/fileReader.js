@@ -6,18 +6,23 @@ var preview = document.getElementById('preview'),
 	previewContext = preview.getContext('2d');
 */
 var	canvas = document.getElementById('canvas'),
-	canvas2 = document.getElementById('canvas2'),
+	//canvas2 = document.getElementById('canvas2'),
 	context = canvas.getContext('2d'),
-	context2 = canvas2.getContext('2d'),
+	//context2 = canvas2.getContext('2d'),
 	reader = new FileReader(),
 	img,
 	imageData,
-	palettes = new Array();
+    pagesWide, pagesHigh,
+	palettes = new Array(),
+    pixel_counts = {}, // record the pixel count of RGB values, including merges
+    num_pages;
+
+var pixels_per_page = 50;  // draw a 50x50 image on each page
 
 canvas.width = 1000;
 canvas.height = 1000;
-canvas2.width = 1000;
-canvas2.height = 1000;
+//canvas2.width = 1000;
+//canvas2.height = 1000;
 
 // Event handlers.........................................
 
@@ -46,14 +51,8 @@ function handleFileSelect(evt) {
 	
 	// Only process image files.
 	if (!f.type.match('image/png') &&  !f.type.match('image/gif')) {
-        // FIXME: not very elegant - let's use a div tag instead
-		context.font = '64px Helvetica';
-		context.linewidth=1.0;
-		context.fillstyle = 'cornflowerblue';
-		context.textAlign = 'center';
-		context.textBaseline = 'middle';
-		context.fillText('PNG or GIF only', canvas.width/2, canvas.height/2);
-		//document.getElementById('output').innerHTML = "<p>Not an image file!</p>";
+        alert('Sorry, this script will only process PNG or GIF-type files.  ' +
+            'You attempted to process a file of type: ' + f.type);
 		return;
 	}
 	
@@ -70,42 +69,33 @@ function fileReadComplete (e) {
 	
 	(function() {
 		if (img.complete){
-            // FIXME: why do this? to clear canvas?
+            // clear HTML5 canvases
 			canvas.width = canvas.width;
-			canvas2.width = canvas2.width;
+			//canvas2.width = canvas2.width;
 
             // need to draw image on canvas to access image data
 			context.drawImage(img, 0, 0);
 			
 			imageData = context.getImageData(0, 0, img.width, img.height);
+
+            // if image is too big, alert user
+            if (imageData.width > 500 || imageData.height > 500) {
+                canvas.width = canvas.width;
+                alert('Sorry, this script will not process images greater than 500 ' +
+                    'pixels wide or 500 pixels high.  ' +
+                    'Your image is ' + imageData.width + ' x ' + imageData.height +
+                    '.  You can download and modify the JS code and run it locally, but ' +
+                    'performance will be slow.');
+                return;
+            }
+
 			var numColours = Object.keys(getColours(imageData)).length;
 			
 			// reset canvases
 			context.clearRect(0, 0, canvas.width, canvas.height);
-			context2.clearRect(0, 0, canvas2.width, canvas2.height);
+			//context2.clearRect(0, 0, canvas2.width, canvas2.height);
 
-            /*
-			// pixels are in row-major order
-			for (var i = 0, row = 0; row < imageData.height; row++) {
-				for (var col = 0; col < imageData.width; col++) {
-					if (imageData.data[i+3] == 0) {
-						// do not draw transparent region
-						i += 4;
-						continue;
-					}
-					context.beginPath();
-					context.rect(10*col, 10*row, 8, 8);
-					context.fillStyle = 'rgb(' + [imageData.data[i], 
-						imageData.data[i+1], imageData.data[i+2]].toString() + ')';
-					context.fill();
-					// no need to explicitly close path for rectangles
-			
-					i += 4;
-				}
-			}
-			*/
-			
-			// generate palettes
+			// generate RGB tree (clustering colours)
 			palettes["rgb"] = makePalette(imageData);
 			
 			var modes = ["dmc", "anchor", "perler", "hama", "lego", "crayola"];
@@ -115,7 +105,8 @@ function fileReadComplete (e) {
 			}
 			
 			var keys, mapped, key, val, rgb, map;
-			
+
+            // map RGB tree to mode-specific palette
 			for (var i = 2; i <= numColours; i++) {
 				keys = Object.keys(palettes["rgb"][i]);
 				mapped = new Array();
@@ -149,7 +140,17 @@ function fileReadComplete (e) {
 			
 			// reset dropdown to RGB
 			document.getElementById('dropdown').value = 'rgb';
-			colourKey.width = colourKey.width;
+			//colourKey.width = colourKey.width;
+
+            // calculate the number of pages
+            pagesWide = Math.ceil(imageData.width / pixels_per_page),
+            pagesHigh = Math.ceil(imageData.height / pixels_per_page);
+
+            num_pages = pagesWide * pagesHigh;  // set global variable
+            $('#page_select option').remove(); // clear the select drop-down
+            for (i = 1; i <= num_pages; i++) {
+                $('#page_select').append('<option value="'+i+'">'+i+'</option>');
+            }
 
             // draw image
             updateCanvas(numColours);

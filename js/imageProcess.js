@@ -24,6 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+var pixel_counts = {};
+
 function getColours(imageData) {
 	// returns an associative array (JS object) where each key is
 	// a unique colour in the image and each value is the number of
@@ -134,6 +136,14 @@ function makePalette (imageData) {
 		We need to generate lookup tables to map from the 'n'
 		RGB values in the original image to 'm' RGB values 
 		where we use a clustering function to map n -> m.
+
+		Returns an Array of length n-1 indexed by m.
+		 Each element holds an Array mapping from n->m.
+
+		Sets global variable pixel_counts with count of
+		 each RGB value.  This assumes that every RGB value
+		 produced by clustering values in the original image
+		 is unique!
 	*/
 	
 	var allColours = getColours(imageData);
@@ -144,21 +154,26 @@ function makePalette (imageData) {
 	var colours = Object.keys(allColours);
 	var ncolours = colours.length;
 	var mx2col = new Array();		// map from distance matrix to colours
-	
-	var indices, 
+	var i; // counter
+	var indices,
 		key1, key2,
 		rgb1, rgb2;
 	var newKey = new Array(3);
 	
-	// manual deep copy
 	var nextColours = new Array();
-	for (var i = 0; i < ncolours; i++) {
-		nextColours[colours[i]] = colours[i];
-		mx2col.push(i);
+
+    pixel_counts = {};  // reset Array
+
+    // manual deep copy to initialize arrays
+	for (i = 0; i < ncolours; i++) {
+        key1 = colours[i];
+		nextColours[key1] = key1; // maps n->n
+        pixel_counts[key1] = allColours[key1]; // transfer count of original RGB
+ 		mx2col.push(i);
 		tree.push(i);
 	}
 	palette[mat.length] = nextColours;
-	
+
 	while (mat.length > 2) {
 		// row and column of minimum distance
 		indices = mat.minUpperTri();
@@ -171,18 +186,20 @@ function makePalette (imageData) {
 		key2 = colours[mx2col[indices[1]]];
 		rgb1 = key1.split(',').map(function(x){return+x;});
 		rgb2 = key2.split(',').map(function(x){return+x;});
-		for (var i = 0; i < 3; i++) {
+		for (i = 0; i < 3; i++) {
 			newKey[i] = Math.round((rgb1[i] + rgb2[i]) / 2.);
 		}
 		
 		// append to end (preserve original 'n' colours)
 		colours.push(newKey.toString());
-		
+
+        // pixel count of new colour is sum of children
+        pixel_counts[newKey] = pixel_counts[key1] + pixel_counts[key2];
 		
 		// update map
 		tree[mx2col[indices[0]]] = tree.length;
 		tree[mx2col[indices[1]]] = tree.length;
-		for (var i = 0; i < tree.length; i++) {
+		for (i = 0; i < tree.length; i++) {
 			if (tree[i] == mx2col[indices[0]] || 
 				tree[i] == mx2col[indices[1]]) {
 				tree[i] = tree.length;
@@ -198,7 +215,7 @@ function makePalette (imageData) {
 		
 		// attach deep copy to palette
 		nextColours = new Array();
-		for (var i = 0; i < ncolours; i++) {
+		for (i = 0; i < ncolours; i++) {
 			nextColours[colours[i]] = colours[tree[i]];
 		}
 		palette[mat.length] = nextColours;
@@ -208,7 +225,22 @@ function makePalette (imageData) {
 }
 
 
+function getPixelCounts(imageData) {
+    var allColours = getColours(imageData),
+        colours = Object.keys(allColours),
+        pixel_counts, // result
+        i, // counter
+        key;
 
+    // deep copy to transfer counts in original image
+    for (i = 0; i < colours.length; i++) {
+        key = colours[i];
+        pixel_counts[key] = allColours[key];
+    }
+
+
+    return pixel_counts;
+}
 
 
 

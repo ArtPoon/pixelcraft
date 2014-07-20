@@ -16,7 +16,7 @@
 				z-index: 1;
 			}
 			.container2 {border:1px solid #ccc; 
-				width: 190px; 
+				width: 250px;
 				height: 400px; 
 				overflow-y: scroll;
 			}
@@ -38,6 +38,16 @@
                     var sliderValue = $('#ncolSlider').val();
                     updateCanvas(sliderValue);
                 })
+
+                // bind page number drop-down to event listener
+                $('#page_select').change(function() {
+                    if (imageData === undefined) {
+                        // no image loaded
+                        return;
+                    }
+                    var sliderValue = $('#ncolSlider').val();
+                    updateCanvas(sliderValue);
+                })
             })
         </script>
 	</head>
@@ -48,92 +58,107 @@
 			pixelcraft
 			</div>
 			<div style="height: 5px;"></div>
-			<div style="float: left; width: 1005px">
-			<!-- left side -->
-			<div id="controlPanel" style="width: 200px; float: left;">
-				
-			
-				<!-- file load button -->
-				<input type="file" id="inputFile" name="inputFile"/>
-				
-				<!-- slider (range input) -->
-				<p>
-				<div style="font-size: 75%;">Number of colours</div>
-				<input type="range" required id="ncolSlider" name="ncolSlider" 
-					min=2 max=2 value=2 onchange='updateNColoursFromSlider()'>
-				<div style="font-size: 75%;" id='ncolState'> </div>
-				</p>
 
-                <!-- checkbox for decorating pixels -->
-                <p>
-                <div style="font-size: 75%;">Decorate pixels?</div>
-                <input id="decorate_pixel_checkbox" type="checkbox"/>
-                </p>
+            <!-- contains the interface-->
+			<table width="1000px">
+                <tr>
+                <td>
+                    <!-- left side -->
+                    <div id="controlPanel" style="margin-right: 300px">
+                        <!-- file load button -->
+                        <input type="file" id="inputFile" name="inputFile"/>
 
-				<!-- drop-down select menu -->
-				<p>
-				<div style="font-size: 75%;">Palette type</div>
-				<select name="dropdown" id="dropdown" onchange='triggerSlider()'>
-					<option value="rgb">RGB</option>
-					<optgroup label="Emb. floss">
-						<option value="dmc">DMC</option>
-						<option value="anchor">Anchor</option>
-					</optgroup>
-					<optgroup label="Beads">
-						<option value="perler">Perler</option>
-						<option value="hama">Hama</option>
-					</optgroup>	
-					<option value="lego">Lego</option>
-					<option value="crayola">Crayola</option>
-				</select>
-				</p>
-				
-				<div class="container2" style="font-size: 12px">
-                <!-- TODO: re-implement this as dynamically-generated table -->
-                    <table id="colour_key_table">
-                        <thead>
-                            <tr>
-                                <th></th> <!-- swatch -->
-                                <th>#</th>
-                                <th>Colour name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                        <!-- slider (range input) -->
+                        <p>
+                        <div style="font-size: 75%;">Number of colours</div>
+                        <input type="range" required id="ncolSlider" name="ncolSlider"
+                            min=2 max=2 value=2 onchange='updateNColoursFromSlider()'>
+                        <div style="font-size: 75%;" id='ncolState'> </div>
+                        </p>
 
-                    <canvas id='colourkey' style="float: left;">
-                        HTML5 Canvas not supported by this browser.
-                    </canvas>
-				</div>
-			
-			</div>
-			
-			<!-- right side -->
-			<div class="container" style="">
-			<canvas id='canvas' style="position: absolute; left: 200; top: 55; z-index: 0;">
-				HTML5 Canvas not supported by this browser.
-			</canvas>
-			<canvas id='canvas2' style="position: absolute; left: 200; top: 55; z-index: 1;">
-				HTML5 Canvas not supported by this browser.
-			</canvas>
-			</div>
-			
+                        <!-- checkbox for decorating pixels -->
+                        <p>
+                        <div style="font-size: 75%;">
+                        Decorate pixels?
+                        <input id="decorate_pixel_checkbox" type="checkbox"/>
+                        </div>
+
+                        </p>
+
+                        <!-- drop-down select menu -->
+                        <p>
+                        <div style="font-size: 75%;">Palette type
+                        <select name="dropdown" id="dropdown" onchange='triggerSlider()'>
+                            <option value="rgb">RGB</option>
+                            <optgroup label="Emb. floss">
+                                <option value="dmc">DMC</option>
+                                <option value="anchor">Anchor</option>
+                            </optgroup>
+                            <optgroup label="Beads">
+                                <option value="perler">Perler</option>
+                                <option value="hama">Hama</option>
+                            </optgroup>
+                            <option value="lego">Lego</option>
+                            <option value="crayola">Crayola</option>
+                        </select>
+                        </div>
+
+                        <div style="font-size: 75%;">Page
+                            <select id="page_select"></select>
+                        </div>
+                        </p>
+
+                        <div class="container2" style="font-size: 12px">
+                        <!-- TODO: re-implement this as dynamically-generated table -->
+                            <table id="colour_key_table" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th></th> <!-- swatch -->
+                                        <th>#</th>
+                                        <th>Colour name</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                            <!--<canvas id='colourkey' style="float: left;">
+                                HTML5 Canvas not supported by this browser.
+                            </canvas>-->
+                        </div>
+
+                    </div>
+                </td>
+                <td>
+                    <!-- right side -->
+                    <div class="container" style="margin-left: -300px; width=500px">
+                        <canvas id='canvas' style="position: absolute; left: 300; top: 55; z-index: 0;">
+                            HTML5 Canvas not supported by this browser.
+                        </canvas>
+                    </div>
+                </td>
+                </tr>
+
+			</table>
+
+
+			<div style="clear: both"></div>
+
 			<div style="height: 5px;"></div>
 			<div style="padding: 5px; font-size: 60%; color: white; background: cornflowerblue">
-			&#169; Art Poon 2013<br>
-			pixelcraft and this website are distributed under the 
-			<a href="http://opensource.org/licenses/MIT">MIT license</a>.<br>  
-			Javascript implementation of KD trees from <a href="https://github.com/ubilabs/kd-tree-javascript">
-			UbiLabs</a>. Anchor RGB values from Tom Klein's <a href="http://cstitch.sourceforge.net/">CStitch</a>.
-			Perler/Hama bead RGB values from Snild Dolkow's <a href="http://dolkow.se/perler/">Perler</a>.<br/>
-			<a href="https://github.com/fryn/html5slider">html5slider</a> (enable HTML5 input range for Firefox) by Frank Yan.
+                &#169; Art Poon 2013<br>
+                pixelcraft and this website are distributed under the
+                <a href="http://opensource.org/licenses/MIT">MIT license</a>.<br>
+                Javascript implementation of KD trees from <a href="https://github.com/ubilabs/kd-tree-javascript">
+                UbiLabs</a>. Anchor RGB values from Tom Klein's <a href="http://cstitch.sourceforge.net/">CStitch</a>.
+                Perler/Hama bead RGB values from Snild Dolkow's <a href="http://dolkow.se/perler/">Perler</a>.<br/>
+                <a href="https://github.com/fryn/html5slider">html5slider</a> (enable HTML5 input range for Firefox) by Frank Yan.
 			</div>
-			</div>
-			
-			
+
 		</div>
-		
+		<!-- end wrap -->
+			
 		<!-- must be placed after canvas elements -->
 		<script src='js/fileReader.js'></script>
 		<script src='js/interface.js'></script>
