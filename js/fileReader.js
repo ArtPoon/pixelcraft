@@ -137,7 +137,7 @@ function fileReadComplete (e) {
 			sliderValue = numColours;
 			
 			// generate first colour key
-			updateColorKey (numColours);
+			//updateColorKey (numColours);
 			
 			// reset dropdown to RGB
 			document.getElementById('dropdown').value = 'rgb';

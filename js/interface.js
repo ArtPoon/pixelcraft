@@ -206,6 +206,7 @@ function updateCanvas (value) {
                 // past end of row in image
                 break;
             }
+
             // imageData.data is a vector indexed as (row*ncol + col)
             i = 4 * (row * imageData.width + col);
             // skip transparent pixels
@@ -252,99 +253,25 @@ function updateCanvas (value) {
                 // already in colour key
                 continue;
             }
-
-            x = pixels_per_page * pixel_step + pixel_margin;
-            y = pixel_margin + legend_step * i;
-
-            context.fillStyle = 'rgb('+map.r+','+map.g+','+map.b+')';
-            context.fillRect(x, y, pixel_width, pixel_width);
-
-            context.fillStyle = '#000000';
-            context.fillText(map.index + ' ' + map.name, x + pixel_step, y + pixel_width - 1);
+            context.fillStyle = 'rgb(' + map.r + ',' + map.g + ',' + map.b + ')';
         }
 
+        x = pixels_per_page * pixel_step + 2*pixel_margin + pixels_per_page / pixels_per_grid * grid_step;
+        y = pixel_margin + legend_step * i;
 
+        context.fillRect(x, y, pixel_width, pixel_width);
+        if ($('#decorate_pixel_checkbox').prop('checked')) {
+            v = cache[keys[i]];
+            decoratePixel(context, x, y, v['dec'], v['inv']);
+        }
 
+        context.fillStyle = '#000000';
+        if (mode === 'rgb') {
+            context.fillText(colours[i], x + pixel_step, y + pixel_width - 1);
+        }
+        else {
+            context.fillText(map.index + ' ' + map.name, x + pixel_step, y + pixel_width - 1);
+        }
         colour_key.push(map);
     }
 }
-
-
-function updateColorKey (value) {
-	/*
-	Map RGB values in the palette to those of some craft type,
-	e.g., DMC floss, Perler beads, Lego, etc.  These will be 
-	rendered in an HTML5 Canvas object as a color key.
-	*/
-	var mode = document.getElementById('dropdown').value;
-	
-	//colourKey.width = colourKey.width; // clear
-	
-	if (mode === 'rgb') {
-        return;
-    }
-    var colours = Object.values(palettes["rgb"][value]);
-    var htmlStr, rgb, map, row = 0;
-    var mapped = [];
-
-
-    $('#colour_key_table tbody tr').remove(); // clear table
-    colourKey.width = pixel_width;
-    colourKey.height = pixel_width * colours.length;
-
-    var hexval = '';
-    for (var i = 0; i < colours.length; i++) {
-        // from original colour space
-        rgb = colours[i].split(',').map(function(x){return+x;});
-
-        // RGB value mapped to another palette
-        map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
-        if (mapped.indexOf(map) > -1) {
-            // already in colour key
-            continue;
-        }
-
-
-
-        // make color swatch - translate rgb tuple to hex string
-        // TODO: draw pixel marks onto colourkey canvas nested in table
-        ckContext.fillStyle('#990000');
-        ckContext.fillRect(0, 0, 10, 10);
-        /*
-        htmlStr += '<td width="15" bgcolor="#';
-        hexval = (map.r).toString(16); // red
-        if (hexval.length < 2) {
-            htmlStr += '0'
-        }
-        htmlStr += hexval;
-        hexval = (map.g).toString(16); // green
-        if (hexval.length < 2) {
-            htmlStr += '0'
-        }
-        htmlStr += hexval;
-        hexval = (map.b).toString(16); // blue
-        if (hexval.length < 2) {
-            htmlStr += '0'
-        }
-        htmlStr += hexval;
-        htmlStr += '">'
-
-        // pixel decorations - how can we do this?
-        htmlStr += '</td>';
-        */
-
-        htmlStr = '<tr></tr><td>' + map.index + '</td>';
-        htmlStr += '<td>' + map.name + '</td>';
-        htmlStr += '<td>' + pixel_counts[colours[i]] + '</td>';
-
-        // TODO: give pixel count of this colour
-
-        htmlStr += '</tr>';
-
-        $('#colour_key_table tbody').append(htmlStr);
-
-        mapped.push(map);
-        row++;
-    }
-}
-
