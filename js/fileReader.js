@@ -24,6 +24,7 @@ canvas.height = 1000;
 //canvas2.width = 1000;
 //canvas2.height = 1000;
 
+
 // Event handlers.........................................
 
 window.onload = function() {

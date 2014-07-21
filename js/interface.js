@@ -1,11 +1,12 @@
-var	//colourKey = document.getElementById('colourkey'),
-	//ckContext = colourkey.getContext('2d'),
-	sliderValue;
+//var	colourKey = document.getElementById('colourkey'),
+//	ckContext = colourkey.getContext('2d'),
+var	sliderValue;
 
 //colourKey.width=300;
 //colourKey.height=400;
 
-var pixel_step = 11,
+var legend_step = 15,
+    pixel_step = 11,
     pixel_width = 10,
     grid_step = 2,
     pixels_per_grid = 10,
@@ -154,7 +155,7 @@ function updateNColoursFromSlider () {
 	sliderValue = $('#ncolSlider').val();
 	document.getElementById('ncolState').innerHTML = sliderValue;
 	updateCanvas(sliderValue);
-	updateColorKey(sliderValue);
+	//updateColorKey(sliderValue);
 }
 
 
@@ -231,6 +232,41 @@ function updateCanvas (value) {
             }
 		}
 	}
+
+    // now draw colour key
+    var colour_key = [];
+    var colours = Object.values(palettes['rgb'][value]);
+    var rgb, map;
+
+    context.font = '12px helvetica, arial, sans-serif';
+    for (i = 0; i < colours.length; i++) {
+        // from original colour space
+        rgb = colours[i].split(',').map(function(x){return+x;});
+
+        if (mode === 'rgb') {
+            context.fillStyle = 'rgb(' + colours[i] + ')';
+        } else {
+            // RGB value mapped to another palette
+            map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
+            if (colour_key.indexOf(map) > -1) {
+                // already in colour key
+                continue;
+            }
+
+            x = pixels_per_page * pixel_step + pixel_margin;
+            y = pixel_margin + legend_step * i;
+
+            context.fillStyle = 'rgb('+map.r+','+map.g+','+map.b+')';
+            context.fillRect(x, y, pixel_width, pixel_width);
+
+            context.fillStyle = '#000000';
+            context.fillText(map.index + ' ' + map.name, x + pixel_step, y + pixel_width - 1);
+        }
+
+
+
+        colour_key.push(map);
+    }
 }
 
 
@@ -251,31 +287,53 @@ function updateColorKey (value) {
     var htmlStr, rgb, map, row = 0;
     var mapped = [];
 
-    // clear table
-    $('#colour_key_table tbody tr').remove();
 
+    $('#colour_key_table tbody tr').remove(); // clear table
+    colourKey.width = pixel_width;
+    colourKey.height = pixel_width * colours.length;
 
+    var hexval = '';
     for (var i = 0; i < colours.length; i++) {
         // from original colour space
         rgb = colours[i].split(',').map(function(x){return+x;});
 
-        // mapped RGB value
+        // RGB value mapped to another palette
         map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
         if (mapped.indexOf(map) > -1) {
             // already in colour key
             continue;
         }
 
-        htmlStr = '<tr>';
 
-        // make color swatch
+
+        // make color swatch - translate rgb tuple to hex string
+        // TODO: draw pixel marks onto colourkey canvas nested in table
+        ckContext.fillStyle('#990000');
+        ckContext.fillRect(0, 0, 10, 10);
+        /*
         htmlStr += '<td width="15" bgcolor="#';
-        htmlStr += (map.r).toString(16);
-        htmlStr += (map.g).toString(16);
-        htmlStr += (map.b).toString(16);
-        htmlStr += '"></td>';
+        hexval = (map.r).toString(16); // red
+        if (hexval.length < 2) {
+            htmlStr += '0'
+        }
+        htmlStr += hexval;
+        hexval = (map.g).toString(16); // green
+        if (hexval.length < 2) {
+            htmlStr += '0'
+        }
+        htmlStr += hexval;
+        hexval = (map.b).toString(16); // blue
+        if (hexval.length < 2) {
+            htmlStr += '0'
+        }
+        htmlStr += hexval;
+        htmlStr += '">'
 
-        htmlStr += '<td>' + map.index + '</td>';
+        // pixel decorations - how can we do this?
+        htmlStr += '</td>';
+        */
+
+        htmlStr = '<tr></tr><td>' + map.index + '</td>';
         htmlStr += '<td>' + map.name + '</td>';
         htmlStr += '<td>' + pixel_counts[colours[i]] + '</td>';
 

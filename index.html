@@ -37,7 +37,7 @@
                     }
                     var sliderValue = $('#ncolSlider').val();
                     updateCanvas(sliderValue);
-                })
+                });
 
                 // bind page number drop-down to event listener
                 $('#page_select').change(function() {
@@ -47,7 +47,17 @@
                     }
                     var sliderValue = $('#ncolSlider').val();
                     updateCanvas(sliderValue);
-                })
+                });
+
+                $('#ncolSlider').on('input propertychange', function() {
+                   if (imageData === undefined) {
+                        // no image loaded
+                        return;
+                    }
+                    var sliderValue = $('#ncolSlider').val();
+                    updateCanvas(sliderValue);
+                    $('#ncolState')[0].innerHTML = sliderValue;
+                });
             })
         </script>
 	</head>
@@ -108,25 +118,32 @@
                         </div>
                         </p>
 
+                        <!--
                         <div class="container2" style="font-size: 12px">
-                        <!-- TODO: re-implement this as dynamically-generated table -->
-                            <table id="colour_key_table" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th></th> <!-- swatch -->
-                                        <th>#</th>
-                                        <th>Colour name</th>
-                                        <th>Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <canvas id='colourkey' style="width: 20px">
+                                            HTML5 Canvas not supported by this browser.
+                                        </canvas>
+                                    </td>
+                                    <td>
+                                        <table id="colour_key_table" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Colour name</th>
+                                                    <th>Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
                             </table>
-
-                            <!--<canvas id='colourkey' style="float: left;">
-                                HTML5 Canvas not supported by this browser.
-                            </canvas>-->
                         </div>
+                        -->
 
                     </div>
                 </td>
