@@ -135,10 +135,7 @@ function fileReadComplete (e) {
 			document.getElementById('ncolSlider').value = numColours;
 			document.getElementById('ncolState').innerHTML = numColours;
 			sliderValue = numColours;
-			
-			// generate first colour key
-			updateColourKey (numColours);
-			
+
 			// reset dropdown to RGB
 			document.getElementById('dropdown').value = 'rgb';
 			//colourKey.width = colourKey.width;
@@ -153,8 +150,8 @@ function fileReadComplete (e) {
                 $('#page_select').append('<option value="'+i+'">'+i+'</option>');
             }
 
-            // draw image
-            updateCanvas(numColours);
+            updateCanvas(numColours); // draw image
+            updateColourKey(numColours); // generate first colour key
 		} else {
 			setTimeout(arguments.callee, 50);
 		}

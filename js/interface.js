@@ -480,6 +480,7 @@ function updateColourKey (value) {
     var mode = document.getElementById('dropdown').value;
 
     //colourKey.width = colourKey.width; // clear
+    $('#colour_key_table tbody tr').remove(); // clear table
 
     if (mode === 'rgb') {
         return;
@@ -487,11 +488,8 @@ function updateColourKey (value) {
     var colours = Object.values(palettes["rgb"][value]);
     var htmlStr, rgb, map, row = 0;
     var mapped = [];
-
-
-    $('#colour_key_table tbody tr').remove(); // clear table
-
     var hexval = '';
+
     for (var i = 0; i < colours.length; i++) {
         // from original colour space
         rgb = colours[i].split(',').map(function (x) {return+x;});
