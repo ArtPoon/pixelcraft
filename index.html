@@ -50,12 +50,13 @@
                 });
 
                 $('#ncolSlider').on('input propertychange', function() {
-                   if (imageData === undefined) {
+                    if (imageData === undefined) {
                         // no image loaded
                         return;
                     }
                     var sliderValue = $('#ncolSlider').val();
                     updateCanvas(sliderValue);
+                    updateColourKey(sliderValue);
                     $('#ncolState')[0].innerHTML = sliderValue;
                 });
 
@@ -131,32 +132,22 @@
 
                         </p>
 
-                        <!--
+
                         <div class="container2" style="font-size: 12px">
-                            <table>
-                                <tr>
-                                    <td>
-                                        <canvas id='colourkey' style="width: 20px">
-                                            HTML5 Canvas not supported by this browser.
-                                        </canvas>
-                                    </td>
-                                    <td>
-                                        <table id="colour_key_table" width="100%">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Colour name</th>
-                                                    <th>Count</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
+                            <table id="colour_key_table" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>#</th>
+                                        <th>Colour name</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
                             </table>
                         </div>
-                        -->
+
 
                     </div>
                 </td>

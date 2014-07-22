@@ -224,7 +224,16 @@ function updateNColoursFromSlider () {
 
 
 function triggerSlider() {
+    /*
+    When drop-down is changed, trigger event handler of slider.
+     */
 	document.getElementById('ncolSlider').onchange();
+    if (imageData === undefined) {
+        // no image loaded
+        return;
+    }
+    var sliderValue = $('#ncolSlider').val();
+    updateColourKey(sliderValue);
 }
 
 
@@ -459,4 +468,67 @@ function exportPDF() {
     }
 
     doc.save('export.pdf');
+}
+
+
+function updateColourKey (value) {
+    /*
+     Map RGB values in the palette to those of some craft type,
+     e.g., DMC floss, Perler beads, Lego, etc.  These will be
+     rendered in an HTML5 Canvas object as a color key.
+     */
+    var mode = document.getElementById('dropdown').value;
+
+    //colourKey.width = colourKey.width; // clear
+
+    if (mode === 'rgb') {
+        return;
+    }
+    var colours = Object.values(palettes["rgb"][value]);
+    var htmlStr, rgb, map, row = 0;
+    var mapped = [];
+
+
+    $('#colour_key_table tbody tr').remove(); // clear table
+
+    var hexval = '';
+    for (var i = 0; i < colours.length; i++) {
+        // from original colour space
+        rgb = colours[i].split(',').map(function (x) {return+x;});
+
+        // RGB value mapped to another palette
+        map = lookupRGB(rgb[0], rgb[1], rgb[2], mode);
+        if (mapped.indexOf(map) > -1) {
+            // already in colour key
+            continue;
+        }
+
+        // make color swatch - translate rgb tuple to hex string
+        htmlStr = '<tr><td width="15" bgcolor="#';
+        hexval = (map.r).toString(16); // red
+        if (hexval.length < 2) {
+            htmlStr += '0'
+        }
+        htmlStr += hexval;
+        hexval = (map.g).toString(16); // green
+        if (hexval.length < 2) {
+            htmlStr += '0'
+        }
+        htmlStr += hexval;
+        hexval = (map.b).toString(16); // blue
+        if (hexval.length < 2) {
+            htmlStr += '0'
+        }
+        htmlStr += hexval;
+        htmlStr += '"></td>'
+
+        htmlStr += '<td>' + map.index + '</td>';
+        htmlStr += '<td>' + map.name + '</td>';
+        htmlStr += '<td>' + pixel_counts[colours[i]] + '</td></tr>';
+
+        $('#colour_key_table tbody').append(htmlStr);
+
+        mapped.push(map);
+        row++;
+    }
 }
