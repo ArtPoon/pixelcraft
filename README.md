@@ -8,6 +8,6 @@ Patterns can be exported as PDFs for saving and printing.
 
 Requirements
 ------------
-* jQuery 2.x [link] (http://jquery.com/)
-* jsPDF [link] (https://code.google.com/p/jspdf/)
-* html5slider [link] (https://github.com/fryn/html5slider)
+* [jQuery 2.x] (http://jquery.com/)
+* [jsPDF] (https://code.google.com/p/jspdf/)
+* [html5slider] (https://github.com/fryn/html5slider)
