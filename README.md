@@ -11,3 +11,4 @@ Requirements
 * [jQuery 2.x] (http://jquery.com/)
 * [jsPDF] (https://code.google.com/p/jspdf/)
 * [html5slider] (https://github.com/fryn/html5slider)
+* [kdTree.js] (https://github.com/ubilabs/kd-tree-javascript)
