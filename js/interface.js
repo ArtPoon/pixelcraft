@@ -168,7 +168,7 @@ function decoratePixelPDF(doc, x, y, key, rgbStr) {
     if (key === '0') {
         doc.circle(x+half, y+half, 0.6*half, 'F');
     } else if (key === 'o') {
-        doc.circle(x+half, y+half, 0.6*half, 'D')
+        doc.circle(x+half, y+half, 0.6*half, 'D');
     } else if (key === 'D') {
         doc.circle(x+half, y+half, 0.8*half, 'F');
         doc.setFillColor(rgb[0], rgb[1], rgb[2]);
